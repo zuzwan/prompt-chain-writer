@@ -3,18 +3,18 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# Load environment variables from .env if present
+# Load environment variables from .env if running locally
 load_dotenv()
 
 app = Flask(__name__)
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['DEBUG'] = True
 
-# Set up OpenAI client (v1.x)
+# Set up OpenAI client (v1.x SDK)
 client = OpenAI()
 model_version = "gpt-4-0125-preview"
 
-# System prompt
+# Define the system prompt
 system_prompt = """You are an expert writer trained in recursive essay composition. Each prompt you receive will be a continuation of a longer essay and must logically connect to the prior section while maintaining clarity and cohesion throughout. Use essay format only. Avoid bullet points, bold formatting, or lists. Use titles and subtitles where appropriate. Write in a style similar to the 'style explainer'."""
 
 @app.route("/")
@@ -29,7 +29,15 @@ def run():
     outputs = []
     prior_output = ""
     for i, prompt in enumerate(prompts):
-        user_prompt = f"Section {i+1}: {prompt}\n\nPrevious Section Output (if any):\n{prior_output}"
+        # Structure the user prompt for clear chaining
+        user_prompt = (
+            f"You are writing Section {i+1} of a multi-part essay. "
+            f"This section must follow logically and stylistically from the prior section.\n\n"
+            f"--- PRIOR SECTION ---\n{prior_output}\n\n"
+            f"--- INSTRUCTIONS FOR SECTION {i+1} ---\n{prompt}\n\n"
+            f"Now write the full draft of Section {i+1}."
+        )
+
         try:
             response = client.chat.completions.create(
                 model=model_version,
@@ -46,10 +54,11 @@ def run():
             print(traceback.format_exc())
             return jsonify({"output": f"Error: {str(e)}"})
 
+    # Combine all section outputs into one essay
     full_output = "\n\n".join(outputs)
     return jsonify({"output": full_output})
 
-# Render-compatible launch
+# Render-compatible app run
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
