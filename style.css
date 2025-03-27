@@ -1,0 +1,33 @@
+
+body {
+    background-color: rgb(30,30,30);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    width: 75%;
+    margin: auto;
+}
+input, textarea {
+    background-color: rgb(39,39,39);
+    border: 1px solid white;
+    color: white;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+button {
+    background-color: white;
+    color: rgb(30,30,30);
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+#output {
+    margin-top: 20px;
+    background-color: rgb(39,39,39);
+    padding: 20px;
+}
